@@ -21,7 +21,10 @@ f.close()
 print wg.number_of_nodes()
 print wg.number_of_edges()
 
-#TODO: need to think of this in terms of map/combine/reduce
+#TODO: test less graph-y approach, but I bet it will be unusuable as scale increases
+#TODO: need to think of this in terms of map/combine/reduce (key for big data sets)
+#TODO: process starts fast, but quickly consumes all the simple 1<->1 cases, then slows down, then speeds up again as node/edge count decreases
+#TODO: output is out of order, easy fix if using mapreduce method, will have to output file, then fseek and change first line later... which stinks (for now)
 
 wine_sold = 0
 while True:
