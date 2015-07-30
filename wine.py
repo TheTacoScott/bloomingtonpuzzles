@@ -25,6 +25,7 @@ print wg.number_of_edges()
 #TODO: test less graph-y approach, but I bet it will be unusuable as scale increases
 #TODO: need to think of this in terms of map/combine/reduce (key for big data sets)
 #TODO: output is out of order, easy fix if using mapreduce method, will have to output file, then fseek and change first line later... which stinks (for now)
+#TODO: need to look into a method to iterate thought a sorted version of the nodes in order of edge count, not sure how to do this yet.
 
 wine_sold = 0
 lowest_wine_edge_count = 1
