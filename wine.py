@@ -23,10 +23,10 @@ print wg.number_of_edges()
 
 #TODO: test less graph-y approach, but I bet it will be unusuable as scale increases
 #TODO: need to think of this in terms of map/combine/reduce (key for big data sets)
-#TODO: process starts fast, but quickly consumes all the simple 1<->1 cases, then slows down, then speeds up again as node/edge count decreases
 #TODO: output is out of order, easy fix if using mapreduce method, will have to output file, then fseek and change first line later... which stinks (for now)
-#TODO: 1 is a special case in my code, but it should increment as the fewest edge count changes over time
+
 wine_sold = 0
+lowest_wine_edge_count = 1
 while True:
   #iterate though all wine nodes, find one with fewest edges
   #if edge count=1, just break and sell that wine right away no reason to further examine,no one else wants it
@@ -34,9 +34,10 @@ while True:
   # WINE SECTION
   wine_node_with_fewest_edges = None
   wine_node_with_fewest_edges_edge_count = 99999
+  wine_search_count = 0
   for node in wg.nodes_iter():
     if node[0]=="p": continue
-
+    wine_search_count += 1
     wine_neighbors = wg.neighbors(node)
     wine_neighbor_count = len(wine_neighbors)
     if wine_neighbor_count == 0: continue
@@ -44,7 +45,8 @@ while True:
     if wine_neighbor_count < wine_node_with_fewest_edges_edge_count:
       wine_node_with_fewest_edges = node
       wine_node_with_fewest_edges_edge_count = wine_neighbor_count
-      if wine_neighbor_count == 1: break
+      if wine_neighbor_count == lowest_wine_edge_count: break
+  lowest_wine_edge_count = wine_node_with_fewest_edges_edge_count
   # END WINE SECTION
 
   #iterate through all connected people to that wine
@@ -62,14 +64,15 @@ while True:
     if person_neighbor_count < person_node_with_fewest_edges_edge_count:
       person_node_with_fewest_edges = person_node
       person_node_with_fewest_edges_edge_count = person_neighbor_count
-      if person_neighbor_count == 1: break
+      
+      if person_neighbor_count == 1: break #special case still safe on persons neighbors
   # END PERSON SECTION
 
   #found node(s) to possibly remove/satisfy
   if person_node_with_fewest_edges and wine_node_with_fewest_edges:
     wg.node[person_node_with_fewest_edges]["count"] += 1
     wine_sold += 1
-    print "{2}\t{0}\t{1}".format(person_node_with_fewest_edges,wine_node_with_fewest_edges,wine_sold)
+    print "{3}\t{2}\t{0}\t{1}".format(person_node_with_fewest_edges,wine_node_with_fewest_edges,wine_sold,lowest_wine_edge_count)
     if wg.node[person_node_with_fewest_edges]["count"] == MAX_WINE:
       wg.remove_node(person_node_with_fewest_edges)
     else:
