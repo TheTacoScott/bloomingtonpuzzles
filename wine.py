@@ -72,7 +72,7 @@ while True:
   if person_node_with_fewest_edges and wine_node_with_fewest_edges:
     wg.node[person_node_with_fewest_edges]["count"] += 1
     wine_sold += 1
-    print "{3}\t{2}\t{0}\t{1}".format(person_node_with_fewest_edges,wine_node_with_fewest_edges,wine_sold,lowest_wine_edge_count)
+    print "{3}/{4}\t{2}\t{0}\t{1}".format(person_node_with_fewest_edges,wine_node_with_fewest_edges,wine_sold,lowest_wine_edge_count,wine_search_count)
     if wg.node[person_node_with_fewest_edges]["count"] == MAX_WINE:
       wg.remove_node(person_node_with_fewest_edges)
     else:
