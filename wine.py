@@ -1,5 +1,6 @@
 import networkx as nx
-import argparse
+import argparse,sys
+from operator import methodcaller
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--input', action="store", dest="input")
@@ -35,6 +36,11 @@ while True:
   wine_node_with_fewest_edges = None
   wine_node_with_fewest_edges_edge_count = 99999
   wine_search_count = 0
+  for x in wg:
+    print x,type(x)
+    sys.exit()
+  #print sorted(wg.nodes_iter(),key=len(methodcaller())[0:10]
+  sys.exit()
   for node in wg.nodes_iter():
     if node[0]=="p": continue
     wine_search_count += 1
