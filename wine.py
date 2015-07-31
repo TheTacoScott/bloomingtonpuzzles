@@ -21,7 +21,8 @@ MIN_MEM_NODE_COUNT = int(args.min_buffer_size)
 MAX_MEM_NODE_COUNT = int(args.max_buffer_size)
 FEWER_COMPARE = int(args.max_prefs + 1)
 
-fg = nx.Graph() #final graph
+fg = nx.Graph()
+pg = nx.Graph()
 g_person_node_count = 0
 g_wine_node_count = 0
 g_root_node_count = 1
@@ -34,14 +35,16 @@ def add_line_to_graph(line):
   (person, wine) = line[0:-1].split("\t")
   person = person.replace("person", "p")
   wine = wine.replace("wine", "w")
-  if not person in fg:
+  if person not in fg and person not in pg:
     fg.add_node(person, {"c": 0})
     g_person_node_count += 1
-  if not wine in fg:
+  if wine not in fg:
     fg.add_node(wine)
     g_wine_node_count += 1
-  fg.add_edge(person, wine)
-  fg.add_edge(person, "r")
+
+  if person not in pg:
+    fg.add_edge(person, wine)
+    fg.add_edge(person, "r")
 
 f = open(args.input, "r")
 
@@ -131,6 +134,7 @@ while nodes_to_process:
     if fg.node[person_node_with_fewest_edges]["c"] == MAX_WINE:
       fg.remove_node(person_node_with_fewest_edges)
       g_person_node_count -= 1
+      pg.add_node(person_node_with_fewest_edges)
     fg.remove_node(wine_node_with_fewest_edges)
     g_wine_node_count -= 1
 f.close()
