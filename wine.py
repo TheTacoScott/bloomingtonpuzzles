@@ -69,8 +69,6 @@ print "DONE"
 
 while nodes_to_process:
   #REFILL THE BUFFER
-  #todo: if we refill the buffer it's possible we see a person node that has already been deleted and shouldn't be considered again.
-  #      this will cause off by x issues
   if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
     while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
       line = f.readline() #read in line from input
