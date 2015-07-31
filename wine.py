@@ -62,6 +62,7 @@ sys.exit()
 #TODO: need to look into a method to iterate thought a sorted version of the nodes in order of edge count, not sure how to do this yet.
 #TODO: use an additional node with numeral name of how many edges the nodes under it have, use tree traversal to navigate down it pre/post
 #TODO: break up data and make small graphs. bucket persons based on 1st 2 digits of id or some such. we'll lose edges, but the speed gain will be significant
+#TODO: write my own distributed graph processing daemons to handle problems like this
 #TODO: possibly have a rolling adjustment of wine node edge counts the processor will accept. start with 1, then if you have to traverse too far down the tree to find another 1, start accepting 2, etc.
 
 
