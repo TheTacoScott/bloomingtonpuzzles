@@ -60,6 +60,8 @@ sys.exit()
 #TODO: need to think of this in terms of map/combine/reduce (key for big data sets)
 #TODO: output is out of order, easy fix if using mapreduce method, will have to output file, then fseek and change first line later... which stinks (for now)
 #TODO: need to look into a method to iterate thought a sorted version of the nodes in order of edge count, not sure how to do this yet.
+#TODO: use an additional node with numeral name of how many edges the nodes under it have, use tree traversal to navigate down it pre/post
+#TODO: break up data and make small graphs
 
 wine_sold = 0
 for neighbor_count in neighbor_counts:
