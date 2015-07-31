@@ -24,38 +24,6 @@ f.close()
 print fg.number_of_nodes()
 print fg.number_of_edges()
 
-neighbor_counts = []
-for node in fg:
-  if node[0]=="p": continue
-  neighbors = fg.neighbors(node)
-  neighbor_count = len(neighbors)
-  if neighbor_count not in neighbor_counts: neighbor_counts.append(neighbor_count)
-  ng.add_edge(node,neighbor_count)
-
-fg = nx.disjoint_union(fg,ng)
-print fg.number_of_nodes()
-print fg.number_of_edges()
-sys.exit()  
-#need to optimize the internal structure of the graph for quicker traversal
-#current_length = 1
-#wg_count = wg.number_of_nodes()
-#while fg.number_of_nodes() != wg_count:
-#  to_delete = []
-#  for node in wg:
-#    if node[0] == "p": continue
-#    neighbors = wg.neighbors(node)
-#    neighbor_count = len(neighbors)
-#    if neighbor_count == current_length:
-#      print current_length,node,neighbors,neighbor_count
-#      fg.add_node(node)
-#      for neighbor_node in neighbors:
-#        fg.add_node(neighbor_node,{"count": 0})
-#        fg.add_edge(node,neighbor_node)
-#  current_length += 1
-#
-#  for node in to_delete:
-#    wg.remove_node(node)
-
 #TODO: test less graph-y approach, but I bet it will be unusuable as scale increases
 #TODO: need to think of this in terms of map/combine/reduce (key for big data sets)
 #TODO: output is out of order, easy fix if using mapreduce method, will have to output file, then fseek and change first line later... which stinks (for now)
@@ -65,20 +33,7 @@ sys.exit()
 #TODO: write my own distributed graph processing daemons to handle problems like this
 #TODO: possibly have a rolling adjustment of wine node edge counts the processor will accept. start with 1, then if you have to traverse too far down the tree to find another 1, start accepting 2, etc.
 
-
 wine_sold = 0
-for neighbor_count in neighbor_counts:
-  for wine_node in nx.dfs_preorder_nodes(ng,neighbor_count):
-    if wine_node==neighbor_count: continue
-    neighbors = fg.neighbors(wine_node)
-    neighbor_count = len(neighbors)
-    if neighbor_count == 1:
-      print "{0} {1}".format(neighbors[0],wine_node)
-      fg.remove_node(wine_node)
-      wine_sold += 1
-    
-
-sys.exit()
 lowest_wine_edge_count = 1
 while True:
   #iterate though all wine nodes, find one with fewest edges
@@ -99,20 +54,11 @@ while True:
     if wine_neighbor_count < wine_node_with_fewest_edges_edge_count:
       wine_node_with_fewest_edges = node
       wine_node_with_fewest_edges_edge_count = wine_neighbor_count
-      if wine_neighbor_count == lowest_wine_edge_count: break
-  #  else:
-  #    if wine_search_count > 1:
-  #      to_readd.append(node)
-  #for node in to_readd:
-  #  wine_node = node 
-  #  person_nodes = fg.neighbors(wine_node)
-  #  person_counts = {}
-  #  for person_node in person_nodes:
-  #    print person_node,len(to_readd),fg[person_node]["count"]
-  #    person_counts[person_node] = fg[person_node]["count"]
-  #  print wine_node,person_nodes,person_counts
-        
-  lowest_wine_edge_count = wine_node_with_fewest_edges_edge_count
+      if wine_neighbor_count <= lowest_wine_edge_count: break
+  if wine_search_count > 1000:
+    lowest_wine_edge_count += 1
+  else:    
+    lowest_wine_edge_count = wine_node_with_fewest_edges_edge_count
   # END WINE SECTION
 
   #iterate through all connected people to that wine
@@ -138,7 +84,7 @@ while True:
   if person_node_with_fewest_edges and wine_node_with_fewest_edges:
     fg.node[person_node_with_fewest_edges]["c"] += 1
     wine_sold += 1
-    print "{3}/{4}\t{5}\t{2}\t{0}\t{1}".format(person_node_with_fewest_edges,wine_node_with_fewest_edges,wine_sold,lowest_wine_edge_count,wine_search_count,skip_count)
+    print "{3}/{4}\t{2}\t{0}\t{1}".format(person_node_with_fewest_edges,wine_node_with_fewest_edges,wine_sold,lowest_wine_edge_count,wine_search_count)
     if fg.node[person_node_with_fewest_edges]["c"] == MAX_WINE:
       fg.remove_node(person_node_with_fewest_edges)
     else:
