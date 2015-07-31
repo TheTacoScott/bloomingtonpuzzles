@@ -1,23 +1,33 @@
 from mrjob.job import MRJob
-
+from mrjob.step import MRStep
 
 class WineFind(MRJob):
 
-    def mapper(self, _, line):
+    def steps(self):
+      return [
+        MRStep(mapper=self.edge_mapper,reducer=self.edge_reducer)
+      ]
+    def edge_mapper(self, _, line):
         person = line.split("\t")[0]
         wine = line.split("\t")[1]
         yield "edges",wine + "-" + person
 
-    def reducer(self, key, values):
-        e = {}
+    def edge_reducer(self, key, values):
+        w = {}
+        p = {}
         for edge in values:
           (wine,person) = edge.split("-")
-          if wine not in e:
-            e[wine] = []
-          if person not in e[wine]:
-            e[wine].append(person)
-        for wine in e:
-          yield "wine", "|".join(e[wine])
+          if person not in p: p[person] = []
+          if wine not in w:   w[wine] = []
+
+          if person not in w[wine]: w[wine].append(person)
+          if wine not in p[person]: p[person].append(wine)
+
+        for wine in w:
+          yield wine, "|".join(w[wine])
+        for person in p:
+          yield person, "|".join(p[person])
+
 
 
 if __name__ == '__main__':
