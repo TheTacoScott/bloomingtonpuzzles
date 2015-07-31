@@ -106,7 +106,9 @@ while nodes_to_process:
     #print "{0}\t{1}".format(person_node_with_fewest_edges,wine_node_with_fewest_edges)
     if fg.node[person_node_with_fewest_edges]["c"] == MAX_WINE:
       fg.remove_node(person_node_with_fewest_edges)
+      fg.remove_node(wine_node_with_fewest_edges)
       g_person_node_count -= 1 
+      g_wine_node_count -= 1
     else:
       fg.remove_node(wine_node_with_fewest_edges)
       g_wine_node_count -= 1
