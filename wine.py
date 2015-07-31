@@ -65,11 +65,13 @@ print "DONE"
 
 while nodes_to_process:
   #REFILL THE BUFFER
-  if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
+  if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT and not file_done:
     while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and not file_done:
       line = f.readline() #read in line from input
       if line:
         add_line_to_graph(line)
+      else:
+        file_done = True
 
   # WINE SECTION
   wine_node_with_fewest_edges = None
