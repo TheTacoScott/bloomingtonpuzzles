@@ -32,6 +32,7 @@ print fg.number_of_edges()
 #TODO: break up data and make small graphs. bucket persons based on 1st 2 digits of id or some such. we'll lose edges, but the speed gain will be significant
 #TODO: write my own distributed graph processing daemons to handle problems like this
 #TODO: possibly have a rolling adjustment of wine node edge counts the processor will accept. start with 1, then if you have to traverse too far down the tree to find another 1, start accepting 2, etc.
+#TODO: since we're a bipartite/non directed graph, we could use a maximal matching algorithm. (thanks old comp sci textbook for reminding me of names)
 
 wine_sold = 0
 lowest_wine_edge_count = 1
@@ -43,20 +44,23 @@ while True:
   wine_node_with_fewest_edges = None
   wine_node_with_fewest_edges_edge_count = 99999
   wine_search_count = 0
-  to_readd = []
+  to_delete = []
   for node in fg.nodes_iter():
     if node[0]=="p": continue
-    wine_search_count += 1
     wine_neighbors = fg.neighbors(node)
     wine_neighbor_count = len(wine_neighbors)
-    if wine_neighbor_count == 0: continue
+    if wine_neighbor_count == 0: 
+      #having this happen is non-optimal but would be a part of any concept,minimize this
+      to_delete.append(node)
+      continue
+    wine_search_count += 1
 
-    if wine_neighbor_count < wine_node_with_fewest_edges_edge_count:
+    if wine_neighbor_count <= wine_node_with_fewest_edges_edge_count:
       wine_node_with_fewest_edges = node
       wine_node_with_fewest_edges_edge_count = wine_neighbor_count
       if wine_neighbor_count <= lowest_wine_edge_count: break
-  if wine_search_count > 1000:
-    lowest_wine_edge_count += 1
+  if wine_search_count > 25:
+    lowest_wine_edge_count = min(lowest_wine_edge_count + 1,10)
   else:    
     lowest_wine_edge_count = wine_node_with_fewest_edges_edge_count
   # END WINE SECTION
@@ -92,5 +96,7 @@ while True:
   else: 
     #no more person -> wine links, time to wrap it up
     break
+  for wine_node in to_delete:
+    fg.remove_node(wine_node)
 
 print wine_sold
