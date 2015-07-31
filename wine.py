@@ -44,7 +44,6 @@ def add_line_to_graph(line):
   fg.add_edge(person, "r")
 
 f = open(args.input, "r")
-valid_line = True
 
 #PROCESS NODES
 wine_sold = 0
@@ -55,24 +54,27 @@ start = time.time()
 
 #PREFILL THE BUFFER
 print "Prebuffering...",
-file_done = False
-line = f.readline() #read in line from input
-while line and (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT:
-  add_line_to_graph(line)
+more_file = True
+
+while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
   line = f.readline() #read in line from input
-  if not line: file_done = True #in case prebuffer is whole file
+  if line:
+    add_line_to_graph(line)
+  else:
+    more_file = False
 print "DONE"
 
 while nodes_to_process:
   #REFILL THE BUFFER
-  #todo: can suffer from off by one
+  #todo: if we refill the buffer it's possible we see a person node that has already been deleted and shouldn't be considered again.
+  #      this will cause off by x issues
   if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
-    while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and not file_done:
+    while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
       line = f.readline() #read in line from input
       if line:
         add_line_to_graph(line)
       else:
-        file_done = True
+        more_file = False
 
   # WINE SECTION
   wine_node_with_fewest_edges = None
