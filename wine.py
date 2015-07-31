@@ -65,7 +65,8 @@ print "DONE"
 
 while nodes_to_process:
   #REFILL THE BUFFER
-  if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT and not file_done:
+  #todo: can suffer from off by one
+  if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
     while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and not file_done:
       line = f.readline() #read in line from input
       if line:
