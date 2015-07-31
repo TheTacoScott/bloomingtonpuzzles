@@ -1,15 +1,17 @@
 import networkx as nx
-import argparse,sys,time
+import argparse, time
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--input', action="store", dest="input")
-parser.add_argument('--buffer', action="store", dest="buffer_size",default=1000000)
-parser.add_argument('--maxwine', action="store", dest="max_wine",default=3)
-parser.add_argument('--maxpref', action="store", dest="max_prefs",default=10)
-args= parser.parse_args()
+parser.add_argument('--min-buffer', action="store", dest="min_buffer_size", default=1000000)
+parser.add_argument('--max-buffer', action="store", dest="max_buffer_size", default=1000000)
+parser.add_argument('--maxwine', action="store", dest="max_wine", default=3)
+parser.add_argument('--maxpref', action="store", dest="max_prefs", default=10)
+args = parser.parse_args()
 
 MAX_WINE = int(args.max_wine)
-MAX_MEM_NODE_COUNT = int(args.buffer_size)
+MIN_MEM_NODE_COUNT = int(args.min_buffer_size)
+MAX_MEM_NODE_COUNT = int(args.max_buffer_size)
 FEWER_COMPARE = int(args.max_prefs + 1)
 
 fg = nx.Graph() #final graph
@@ -39,6 +41,8 @@ wine_sold = 0
 lowest_wine_edge_count = 1
 nodes_to_process = True
 
+start = time.time()
+
 #PREFILL THE BUFFER
 print "Prebuffering...",
 file_done = False
@@ -51,10 +55,11 @@ print "DONE"
 
 while nodes_to_process:
   #REFILL THE BUFFER
-  while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and not file_done:
-    line = f.readline() #read in line from input
-    if line:
-      add_line_to_graph(line)
+  if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
+    while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and not file_done:
+      line = f.readline() #read in line from input
+      if line:
+        add_line_to_graph(line)
 
   # WINE SECTION
   wine_node_with_fewest_edges = None
@@ -109,4 +114,4 @@ while nodes_to_process:
     fg.remove_node(wine_node_with_fewest_edges)
     g_wine_node_count -= 1
 f.close()
-print wine_sold
+print args.min_buffer_size,args.max_buffer_size,wine_sold,round(time.time()-start,3)
