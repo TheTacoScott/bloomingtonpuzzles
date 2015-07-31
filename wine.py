@@ -61,7 +61,9 @@ sys.exit()
 #TODO: output is out of order, easy fix if using mapreduce method, will have to output file, then fseek and change first line later... which stinks (for now)
 #TODO: need to look into a method to iterate thought a sorted version of the nodes in order of edge count, not sure how to do this yet.
 #TODO: use an additional node with numeral name of how many edges the nodes under it have, use tree traversal to navigate down it pre/post
-#TODO: break up data and make small graphs
+#TODO: break up data and make small graphs. bucket persons based on 1st 2 digits of id or some such. we'll lose edges, but the speed gain will be significant
+#TODO: possibly have a rolling adjustment of wine node edge counts the processor will accept. start with 1, then if you have to traverse too far down the tree to find another 1, start accepting 2, etc.
+
 
 wine_sold = 0
 for neighbor_count in neighbor_counts:
