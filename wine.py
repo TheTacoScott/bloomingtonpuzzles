@@ -103,6 +103,7 @@ while nodes_to_process:
   wine_node_with_fewest_edges = None
   wine_node_with_fewest_edges_edge_count = FEWER_COMPARE
   wine_search_count = 0
+
   for node in nx.dfs_postorder_nodes(fg, "r"): #dfs postorder is magic and should be worshiped. --Andy Weir
     if node == "r": continue #skip root node
     if node[0] == "p": continue #doubt we'll ever hit here, but skip people nodes
