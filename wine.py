@@ -11,7 +11,7 @@ import argparse, time
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--input', action="store", dest="input")
-parser.add_argument('--tree-merge', action="store", dest="tree_merge", default=100000)
+parser.add_argument('--tree-merge', action="store", dest="tree_merge", default=75000)
 parser.add_argument('--min-buffer', action="store", dest="min_buffer_size", default=1000000)
 parser.add_argument('--max-buffer', action="store", dest="max_buffer_size", default=1000000)
 parser.add_argument('--maxwine', action="store", dest="max_wine", default=3)
@@ -44,16 +44,21 @@ def add_line_to_graph(line):
   person_id = long(person.replace("p",""))
   wine_id = long(wine.replace("w",""))
 
-  if person not in fg and not pt[person_id]:
+  pt_set = pt[person_id]
+  wt_set = wt[wine_id]
+
+  if person not in fg and not pt_set: #do not add the same person twice, and do not add a person we've already sold 3 wines to
     fg.add_node(person, {"c": 0})
     g_person_node_count += 1
     
-  if wine not in fg and not wt[wine_id]:
+  if wine not in fg and not wt_set: #do not add the same wine twice, and do not add a wine we've already sold
     fg.add_node(wine)
     g_wine_node_count += 1
 
-  fg.add_edge(person, wine)
-  fg.add_edge(person, "r")
+  if not pt_set and not wt_set:
+    fg.add_edge(person, wine)
+  if not pt_set:
+    fg.add_edge(person, "r")
 
 f = open(args.input, "r")
 
@@ -138,14 +143,14 @@ while nodes_to_process:
 
   #found node(s) to possibly remove/satisfy
   if person_node_with_fewest_edges and wine_node_with_fewest_edges:
-    fg.node[person_node_with_fewest_edges]["c"] += 1
-    wine_sold += 1
     print "{2: >10}\t{0: >10}\t{1: >10}\tBuffer: {3}\tW: {4}\tP:{5}".format(person_node_with_fewest_edges,
                                                                             wine_node_with_fewest_edges,
                                                                             wine_sold,
                                                                             g_person_node_count+g_wine_node_count,
                                                                             g_wine_node_count,
                                                                             g_person_node_count)
+    fg.node[person_node_with_fewest_edges]["c"] += 1
+    wine_sold += 1
     if fg.node[person_node_with_fewest_edges]["c"] == MAX_WINE:
       fg.remove_node(person_node_with_fewest_edges)
       g_person_node_count -= 1
