@@ -72,7 +72,7 @@ start = time.time()
 #PREFILL THE BUFFER
 more_file = True
 while nodes_to_process or more_file:
-  print "WHILE START",nodes_to_process,more_file
+  print "WHILE START",nodes_to_process,more_file,(g_person_node_count+g_wine_node_count),MIN_MEM_NODE_COUNT
   #REFILL THE BUFFER
   if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
     print "Merge Tree Overlaps"
@@ -87,11 +87,14 @@ while nodes_to_process or more_file:
       else:
         more_file = False
     print "Done"
+
   print "FG Length:",len(fg)
   max_match = nx.maximal_matching(fg)
   print "Match Count:",len(max_match)
   if len(max_match) == 0:
     fg.clear()
+    g_person_node_count = 0
+    g_wine_node_count = 0
     nodes_to_process = False
   for node in max_match:
     if node[0][0] == "w": 
