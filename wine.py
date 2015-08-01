@@ -11,9 +11,9 @@ import argparse, time
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--input', action="store", dest="input")
-parser.add_argument('--tree-merge', action="store", dest="tree_merge", default=75000)
+parser.add_argument('--tree-merge', action="store", dest="tree_merge", default=80000)
 parser.add_argument('--min-buffer', action="store", dest="min_buffer_size", default=1000000)
-parser.add_argument('--max-buffer', action="store", dest="max_buffer_size", default=1000000)
+parser.add_argument('--max-buffer', action="store", dest="max_buffer_size", default=1100000)
 parser.add_argument('--maxwine', action="store", dest="max_wine", default=3)
 parser.add_argument('--maxpref', action="store", dest="max_prefs", default=10)
 args = parser.parse_args()
@@ -155,10 +155,49 @@ while nodes_to_process:
       fg.remove_node(person_node_with_fewest_edges)
       g_person_node_count -= 1
       person_id = long(person_node_with_fewest_edges.replace("p",""))
-      pt.add(Interval(person_id,person_id+1))
+      has_higher = list(pt[person_id+1])
+      has_lower = list(pt[person_id-1])
+      if has_higher and has_lower: #this person is being insert right next to it's siblings, merge them into one
+        begin = has_lower[0].begin
+        end = has_higher[0].end
+        pt.remove(has_lower[0])
+        pt.remove(has_higher[0])
+        pt.add(Interval(begin,end))
+      elif has_higher:
+        begin = person_id
+        end = has_higher[0].end
+        pt.remove(has_higher[0])
+        pt.add(Interval(begin,end))
+      elif has_lower:
+        begin = has_lower[0].begin
+        end = person_id
+        pt.remove(has_lower[0])
+        pt.add(Interval(begin,end))
+      else:
+        pt.add(Interval(person_id,person_id+1))
     fg.remove_node(wine_node_with_fewest_edges)
     g_wine_node_count -= 1
     wine_id = long(wine_node_with_fewest_edges.replace("w",""))
-    wt.add(Interval(wine_id,wine_id+1))
+    #keeping redundent code for now
+    has_higher = list(wt[wine_id+1])
+    has_lower = list(wt[wine_id-1])
+    if has_higher and has_lower: 
+      begin = has_lower[0].begin
+      end = has_higher[0].end
+      wt.remove(has_lower[0])
+      wt.remove(has_higher[0])
+      wt.add(Interval(begin,end))
+    elif has_higher:
+      begin = wine_id
+      end = has_higher[0].end
+      wt.remove(has_higher[0])
+      wt.add(Interval(begin,end))
+    elif has_lower:
+      begin = has_lower[0].begin
+      end = wine_id
+      wt.remove(has_lower[0])
+      wt.add(Interval(begin,end))
+    else:
+      wt.add(Interval(wine_id,wine_id+1))
 f.close()
 print args.min_buffer_size, args.max_buffer_size, wine_sold, round(time.time()-start, 3)
