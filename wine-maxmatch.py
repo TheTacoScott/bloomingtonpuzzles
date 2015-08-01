@@ -78,7 +78,7 @@ while nodes_to_process or more_file:
     print "Merge Tree Overlaps"
     pt.merge_overlaps()
     wt.merge_overlaps()
-    print "Buffering...",
+    print "Buffering..."
     while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
       line = f.readline() #read in line from input
       if line:
@@ -86,7 +86,7 @@ while nodes_to_process or more_file:
           nodes_to_process = True
       else:
         more_file = False
-    print "Done"
+    print "Buffering Done"
 
   print "FG Length:",len(fg)
   max_match = nx.maximal_matching(fg)
