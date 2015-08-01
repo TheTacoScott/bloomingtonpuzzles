@@ -70,21 +70,15 @@ nodes_to_process = True
 start = time.time()
 
 #PREFILL THE BUFFER
-print "Prebuffering...",
 more_file = True
-
-while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
-  line = f.readline() #read in line from input
-  if line:
-    add_line_to_graph(line)
-  else:
-    more_file = False
-print "DONE"
-
 while nodes_to_process or more_file:
-  print "WHILE START"
+  print "WHILE START",nodes_to_process,more_file
   #REFILL THE BUFFER
   if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
+    print "Merge Tree Overlaps"
+    pt.merge_overlaps()
+    wt.merge_overlaps()
+    print "Buffering...",
     while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
       line = f.readline() #read in line from input
       if line:
@@ -92,8 +86,10 @@ while nodes_to_process or more_file:
           nodes_to_process = True
       else:
         more_file = False
-
+    print "Done"
+  print "FG Length:",len(fg)
   max_match = nx.maximal_matching(fg)
+  print "Match Count:",len(max_match)
   if len(max_match) == 0:
     fg.clear()
     nodes_to_process = False
@@ -117,8 +113,6 @@ while nodes_to_process or more_file:
     fg.remove_node(wine)
 
     print "{0}\t{1}\t{2}".format(person,wine,wine_sold)
-  pt.merge_overlaps()
-  wt.merge_overlaps()
     
 f.close()
 print args.min_buffer_size, args.max_buffer_size, wine_sold, round(time.time()-start, 3)

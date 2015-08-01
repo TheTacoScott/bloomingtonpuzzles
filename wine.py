@@ -11,7 +11,6 @@ import argparse, time
 
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--input', action="store", dest="input")
-parser.add_argument('--tree-merge', action="store", dest="tree_merge", default=80000)
 parser.add_argument('--min-buffer', action="store", dest="min_buffer_size", default=1000000)
 parser.add_argument('--max-buffer', action="store", dest="max_buffer_size", default=1100000)
 parser.add_argument('--maxwine', action="store", dest="max_wine", default=3)
@@ -69,29 +68,20 @@ nodes_to_process = True
 
 start = time.time()
 
-#PREFILL THE BUFFER
-print "Prebuffering...",
 more_file = True
-
-while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
-  line = f.readline() #read in line from input
-  if line:
-    add_line_to_graph(line)
-  else:
-    more_file = False
-print "DONE"
+merge_requested = False
 loop_count = 0
 while nodes_to_process:
   loop_count += 1
-
-  if loop_count >= args.tree_merge:
+  if loop_count > MIN_MEM_NODE_COUNT:
     loop_count = 0
-    #print "OLD:",len(pt),len(wt)
-    pt.merge_overlaps()
-    wt.merge_overlaps()
-    #print "NEW:",len(pt),len(wt)
+    merge_requested = True
   #REFILL THE BUFFER
   if (g_person_node_count+g_wine_node_count) < MIN_MEM_NODE_COUNT:
+    if merge_requested:
+      pt.merge_overlaps()
+      wt.merge_overlaps()
+      merge_requested = False
     while (g_person_node_count+g_wine_node_count) < MAX_MEM_NODE_COUNT and more_file:
       line = f.readline() #read in line from input
       if line:
