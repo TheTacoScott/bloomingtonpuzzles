@@ -164,7 +164,7 @@ while nodes_to_process:
 
   #found node(s) to possibly remove/satisfy
   if person_node_with_fewest_edges and wine_node_with_fewest_edges:
-    print "{2: >10}\t{0: >10}\t{1: >10}\tBuffer: {3}\tW: {4}\tP:{5}".format(person_node_with_fewest_edges,
+    print wine_search_count,"{2: >10}\t{0: >10}\t{1: >10}\tBuffer: {3}\tW: {4}\tP:{5}".format(person_node_with_fewest_edges,
                                                                             wine_node_with_fewest_edges,
                                                                             wine_sold,
                                                                             g_person_node_count+g_wine_node_count,
