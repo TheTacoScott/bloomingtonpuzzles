@@ -35,11 +35,13 @@ def distance(x,y,z,x2,y2,z2):
 with open(args.palette, "r") as f:
   for line in f:
     (points,text) = line[0:-1].split("\t")
-    (x,y,z) = points.split(",")
-    x = float(x)
-    y = float(y)
-    z = float(z)
-    color_lookup[(x,y,z)] = text
+    (l,a,b) = points.split(",")
+    lab = np.array([[[l,a,b]]],dtype=np.float32)
+    (r,g,b) = cv2.cvtColor(lab,cv2.COLOR_LAB2RGB)[0][0]
+    r = int(r *  255)
+    g = int(g *  255)
+    b = int(b *  255)
+    color_lookup[(r,g,b)] = text
 
 star = cv2.StarDetector()
 
@@ -49,33 +51,34 @@ with open(args.urls, "r") as f:
     r = requests.get(url)
     im = Image.open(StringIO(r.content))
 
+    imbgr = cv2.cvtColor(np.asarray(im), cv2.COLOR_RGB2BGR)
     imstar = cv2.cvtColor(np.asarray(im), cv2.COLOR_RGB2BGR)
-    imgftt = cv2.cvtColor(np.asarray(im), cv2.COLOR_RGB2BGR)
-
     imgray = cv2.cvtColor(np.asarray(im), cv2.COLOR_RGB2GRAY)
+
     xp = []
     yp = []
     corners = cv2.goodFeaturesToTrack(imgray,25,0.01,10)
     corners = np.int0(corners)
     for i in corners:
       (x,y) = i.ravel()
-      cv2.circle(imgftt,(int(x),int(y)),10,(0,255,0))
-
-    points = star.detect(imgray)
-    for point in points:
-      (x,y) = (point.pt[0],point.pt[1])
       xp.append(x)
       yp.append(y)
-      cv2.circle(imstar,(int(x),int(y)),10,(0,255,0))
-      print x,y
-    if len(points) > 0:
-      (cx,cy) = (sum(xp) / len(points), sum(yp) / len(points))
+    points = star.detect(imgray)
+    #imstar = cv2.drawKeypoints(imstar,star.detect(imgray))
+    for point in points:
+      (x,y) = (int(point.pt[0]),int(point.pt[1]))
+      xp.append(x)
+      yp.append(y)
+    if len(xp) > 0:
+      (cx,cy) = (sum(xp) / len(xp), sum(yp) / len(xp))
     else:
-      print imgray.shape
       (cy,cx) = imgray.shape
       cx = cx / 2
       cy = cy / 2
-    cv2.circle(imstar,(int(cx),int(cy)),10,(0,0,255))
-    cv2.imwrite("/mnt/mondo/tmp/star{0}.jpg".format(index),imstar)
-    cv2.imwrite("/mnt/mondo/tmp/gftt{0}.jpg".format(index),imgftt)
 
+    for x,y in zip(xp,yp):
+      cv2.circle(imstar,(int(x),int(y)),10,(255,0,0))
+    cv2.circle(imstar,(int(cx),int(cy)),10,(0,255,0))
+    b,g,r = imbgr[cx,cy]
+    print index,find_color(r,g,b),(r,g,b),(b,g,r)
+    cv2.imwrite("/mnt/mondo/tmp/star{0}.jpg".format(index),imstar)
