@@ -84,9 +84,10 @@ def add_line_to_graph(line):
   else:
     pt_set = wt_set = False
 
-  if person not in fg and not pt_set: #do not add the same person twice, and do not add a person we've already sold 3 wines to
-    fg.add_node(person)
-    g_person_node_count += 1
+  if person not in fg: #do not add the same person twice, and do not add a person we've already sold 3 wines to
+    if not pt_set or pt_set < MAX_WINE: 
+      fg.add_node(person)
+      g_person_node_count += 1
     
   if wine not in fg and not wt_set: #do not add the same wine twice, and do not add a wine we've already sold
     fg.add_node(wine)
