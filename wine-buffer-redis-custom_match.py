@@ -134,7 +134,7 @@ while nodes_to_process:
       if len(fg.neighbors(node)) == 1:
         people_to_delete.append(node)
       person_skip_count += 1
-      continue #doubt we'll ever hit here, but skip people nodes
+      continue 
 
     wine_neighbors = fg.neighbors(node)
     wine_neighbor_count = len(wine_neighbors)
