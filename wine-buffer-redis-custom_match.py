@@ -39,13 +39,13 @@ g_wine_node_count = 0
 g_root_node_count = 1
 redis_has_values = False
 
-def redis_set_value(key,value,kind):
+def redis_set_value(key,kind):
   if kind == "p":
     shard = REDIS_SHARDS_P[hash(key) % REDIS_SHARD_P_HASH_MOD]
   elif kind == "w":
     shard = REDIS_SHARDS_W[hash(key) % REDIS_SHARD_W_HASH_MOD]
   if shard:
-    return shard.set(key,value)
+    return shard.incr(key,amount=1)
   return None
 
 def redis_get_value(key,kind):
@@ -54,7 +54,9 @@ def redis_get_value(key,kind):
   elif kind == "w":
     shard = REDIS_SHARDS_W[hash(key) % REDIS_SHARD_W_HASH_MOD]
   if shard:
-    return shard.get(key)
+    data = shard.get(key)
+    if data:
+      return int(data)
   return None
 
 #flush cache for this run
@@ -83,7 +85,7 @@ def add_line_to_graph(line):
     pt_set = wt_set = False
 
   if person not in fg and not pt_set: #do not add the same person twice, and do not add a person we've already sold 3 wines to
-    fg.add_node(person, {"c": 0})
+    fg.add_node(person)
     g_person_node_count += 1
     
   if wine not in fg and not wt_set: #do not add the same wine twice, and do not add a wine we've already sold
@@ -123,10 +125,15 @@ while nodes_to_process:
   wine_node_with_fewest_edges = None
   wine_node_with_fewest_edges_edge_count = FEWER_COMPARE
   wine_search_count = 0
-
+  person_skip_count = 0
+  people_to_delete = []
   for node in nx.dfs_postorder_nodes(fg, "r"): #dfs postorder is magic and should be worshiped. --Andy Weir
     if node == "r": continue #skip root node
-    if node[0] == "p": continue #doubt we'll ever hit here, but skip people nodes
+    if node[0] == "p": 
+      if len(fg.neighbors(node)) == 1:
+        people_to_delete.append(node)
+      person_skip_count += 1
+      continue #doubt we'll ever hit here, but skip people nodes
 
     wine_neighbors = fg.neighbors(node)
     wine_neighbor_count = len(wine_neighbors)
@@ -164,24 +171,31 @@ while nodes_to_process:
 
   #found node(s) to possibly remove/satisfy
   if person_node_with_fewest_edges and wine_node_with_fewest_edges:
-    print wine_search_count,"{2: >10}\t{0: >10}\t{1: >10}\tBuffer: {3}\tW: {4}\tP:{5}".format(person_node_with_fewest_edges,
+    print "Traversed W#: {6: >5}\tTraversed P#: {7: >5}\tP-ID: {0: >10}\tW-ID: {1: >10}\tBuffer: {3: >8}\tW: {4: >10}\tP:{5:>10}\tSold: {2: >10}".format(person_node_with_fewest_edges,
                                                                             wine_node_with_fewest_edges,
                                                                             wine_sold,
                                                                             g_person_node_count+g_wine_node_count,
                                                                             g_wine_node_count,
-                                                                            g_person_node_count)
-    fg.node[person_node_with_fewest_edges]["c"] += 1
+                                                                            g_person_node_count,
+                                                                            wine_search_count,
+                                                                            person_skip_count
+                                                                    )
     wine_sold += 1
-    if fg.node[person_node_with_fewest_edges]["c"] == MAX_WINE:
+    person_id = long(person_node_with_fewest_edges.replace("p",""))
+    wine_id = long(wine_node_with_fewest_edges.replace("w",""))
+    if redis_get_value(person_id,"p") == MAX_WINE:
       fg.remove_node(person_node_with_fewest_edges)
       g_person_node_count -= 1
-      person_id = long(person_node_with_fewest_edges.replace("p",""))
-      redis_set_value(person_id,1,"p")
     fg.remove_node(wine_node_with_fewest_edges)
     g_wine_node_count -= 1
-    wine_id = long(wine_node_with_fewest_edges.replace("w",""))
-    redis_set_value(wine_id,1,"w")
+    redis_set_value(wine_id,"w")
     redis_has_values = True
+  
+  #these are people that have no edges that matter, we'll delete them from the graph for now
+  #we'll readd them should they show up in the input file again
+  for person in people_to_delete:
+    fg.remove_node(person)
+    g_person_node_count -= 1
 
 f.close()
 print args.min_buffer_size, args.max_buffer_size, wine_sold, round(time.time()-start, 3)
