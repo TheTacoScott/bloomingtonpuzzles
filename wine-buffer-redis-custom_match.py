@@ -184,6 +184,7 @@ while nodes_to_process:
     wine_sold += 1
     person_id = long(person_node_with_fewest_edges.replace("p",""))
     wine_id = long(wine_node_with_fewest_edges.replace("w",""))
+    redis_set_value(person_id,"p")
     if redis_get_value(person_id,"p") == MAX_WINE:
       fg.remove_node(person_node_with_fewest_edges)
       g_person_node_count -= 1
