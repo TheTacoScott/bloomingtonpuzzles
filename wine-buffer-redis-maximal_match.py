@@ -40,12 +40,13 @@ REDIS_SHARD_P_HASH_MOD = len(REDIS_SHARDS_P)
 redis_has_values = False
 
 #flush cache for this run
-print "Flushing Databases"
-for shard in REDIS_SHARDS_W:
-  REDIS_SHARDS_W[shard].flushdb()
-for shard in REDIS_SHARDS_P:
-  REDIS_SHARDS_P[shard].flushdb()
-print "Flushing Databases -- DONE"
+def flush_redis():
+  print "Flushing Databases"
+  for shard in REDIS_SHARDS_W:
+    REDIS_SHARDS_W[shard].flushdb()
+  for shard in REDIS_SHARDS_P:
+    REDIS_SHARDS_P[shard].flushdb()
+  print "Flushing Databases -- DONE"
 
 
 def redis_set_value(key,value,kind):
@@ -97,7 +98,7 @@ def add_line_to_graph(line):
   if not pt_set and not wt_set:
     fg.add_edge(person, wine)
   return added_nodes
-
+flush_redis()
 f = open(args.input, "r")
 
 wine_sold = 0
@@ -153,4 +154,5 @@ while nodes_to_process or more_file:
     print "{0}\t{1}\t{2}".format(person,wine,wine_sold)
     
 f.close()
+flush_redis()
 print args.min_buffer_size, args.max_buffer_size, wine_sold, round(time.time()-start, 3)
